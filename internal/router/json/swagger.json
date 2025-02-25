@@ -1,0 +1,68 @@
+{
+		   "swagger":"2.0",
+		   "info":{
+			  "title": "Gateway",
+			  "version":"version not set"
+		   },
+		   "schemes":[
+			  "http"
+		   ],
+           "host": "localhost:3000",
+		   "paths":{
+			 
+		"/api/v1/candles":{
+			
+		 "get":{
+				"summary": "Get candles",
+				
+		"produces": [
+          "application/json"
+        ]
+	,
+				"responses":{
+				   "200":{
+					  "description":"A successful response.",
+						 "schema": { "$ref": "#/definitions/github.com.Sicarii.NaumaN.poloniex.gateway.api.internal.handler.response_Response.string." }
+				   },
+				   "default":{
+					  "description":"An unexpected error response.",
+						 "schema": { "$ref": "#/definitions/github.com.Sicarii.NaumaN.poloniex.gateway.api.tools.swagger_RpcStatus" }
+				   }
+				},
+				
+				"tags":[
+				   "Trade"
+				]
+			 }
+	
+      	},
+		"/api/v1/trades":{
+			
+		 "get":{
+				"summary": "Get trades",
+				
+		"produces": [
+          "application/json"
+        ]
+	,
+				"responses":{
+				   "200":{
+					  "description":"A successful response.",
+						 "schema": { "$ref": "#/definitions/github.com.Sicarii.NaumaN.poloniex.gateway.api.internal.handler.response_Response.string." }
+				   },
+				   "default":{
+					  "description":"An unexpected error response.",
+						 "schema": { "$ref": "#/definitions/github.com.Sicarii.NaumaN.poloniex.gateway.api.tools.swagger_RpcStatus" }
+				   }
+				},
+				
+				"tags":[
+				   "Trade"
+				]
+			 }
+	
+      	}
+		   },
+		   "definitions": 
+			 {"github.com.Sicarii.NaumaN.poloniex.gateway.api.internal.handler.response_Response.string.":{"properties":{"data":{"type":"string"},"message":{"type":"string"},"success":{"type":"boolean"}},"type":"object"},"github.com.Sicarii.NaumaN.poloniex.gateway.api.tools.swagger_ProtobufAny":{"properties":{"@type":{"type":"string"}},"type":"object"},"github.com.Sicarii.NaumaN.poloniex.gateway.api.tools.swagger_RpcStatus":{"properties":{"code":{"type":"integer"},"details":{"items":{"$ref":"#/definitions/github.com.Sicarii.NaumaN.poloniex.gateway.api.tools.swagger_ProtobufAny"},"type":"array"},"message":{"type":"string"}},"type":"object"}}
+		}
