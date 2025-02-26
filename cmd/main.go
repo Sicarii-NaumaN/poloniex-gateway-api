@@ -42,22 +42,44 @@ func main() {
 		}
 	}()
 
-	// Тут происходит синк архивных свечей
 	syncer := prepare.InitSyncer(db, poloniexSvc)
+
+	// Если мы хотим формировать свечи ОДНОВРЕМЕННО с запуском приложения, то. нам для этого нужно по REST
+	// достать предыдущие трейды для каждого размера свечи (GetCandleIntervalByTime) для времени запуска приложения
 	go func() {
 		dctx := xcontext.NewDetachedContext(ctx)
-		if err := syncer.RunSyncCandles(dctx); err != nil {
+		err = syncer.RunSyncCandles(dctx)
+		if err != nil {
 			logger.Errorf("fatal error syncer.RunSyncCandles: %v", err)
 		}
 	}()
-
-	// Вот тут логика преобразования трейдов свечи
 	go func() {
 		dctx := xcontext.NewDetachedContext(ctx)
+		// Вот тут логика преобразования трейдов свечи
 		if err = syncer.RunCandlesBuilder(dctx); err != nil {
 			logger.Errorf("fatal error syncer.RunCandlesBuilder: %v", err)
 		}
 	}()
+
+	// Тут представлен вариант где мы дожидаемся завершение синка и только после этого строим свечи
+	//var wg sync.WaitGroup
+	//wg.Add(1)
+	//go func() {
+	//	dctx := xcontext.NewDetachedContext(ctx)
+	//	// Тут происходит синк архивных свечей
+	//	err = syncer.RunSyncCandles(dctx)
+	//	if err != nil {
+	//		logger.Errorf("fatal error syncer.RunSyncCandles: %v", err)
+	//	}
+	//}()
+	//wg.Wait()
+	//go func() {
+	//	dctx := xcontext.NewDetachedContext(ctx)
+	//	// Вот тут логика преобразования трейдов свечи
+	//	if err = syncer.RunCandlesBuilder(dctx); err != nil {
+	//		logger.Errorf("fatal error syncer.RunCandlesBuilder: %v", err)
+	//	}
+	//}()
 
 	port := config.GetConfigInt(config.Port)
 	logger.Info(fmt.Sprintf("Started server at :%d. Swagger docs stated at %d", port, port+1))

@@ -61,7 +61,7 @@ func (s *Service) RunSyncCandles(ctx context.Context) (err error) {
 	}
 }
 
-const runCandlesBuilderTimer = 30 * time.Second
+const runCandlesBuilderTimer = 20 * time.Second
 
 // Хотел изначально для разнообразия в кронджобе реализовать, но времени не было
 func (s *Service) RunCandlesBuilder(ctx context.Context) (err error) {

@@ -79,17 +79,17 @@ func (s *Service) Build(ctx context.Context, candleIntervalsByTime map[poloniex.
 				tids = append(tids, trade.Tid)
 			}
 
-			for j := 0; j < len(tids); j += batchSize {
-				end := j + batchSize
-				if end > len(tids) {
-					end = len(tids)
-				}
-				batch := tids[j:end]
-				err = s.rep.UpdateTradesProcessedByInterval(ctx, batch, i)
-				if err != nil {
-					return fmt.Errorf("error in UpdateTradesProcessedByInterval: %w", err)
-				}
+			//for j := 0; j < len(tids); j += batchSize {
+			//	end := j + batchSize
+			//	if end > len(tids) {
+			//		end = len(tids)
+			//	}
+			//	batch := tids[j:end]
+			err = s.rep.UpdateTradesProcessedByInterval(ctx, tids, i)
+			if err != nil {
+				return fmt.Errorf("error in UpdateTradesProcessedByInterval: %w", err)
 			}
+			//}
 		}
 	}
 
