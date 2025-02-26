@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// Для тестов
 func (i *implementation) GetTrades(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

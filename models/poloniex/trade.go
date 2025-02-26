@@ -1,16 +1,7 @@
 package poloniex
 
 import (
-	"fmt"
 	"strconv"
-	"sync"
-)
-
-const (
-	diffOneMin     = 60 * 1000
-	diffFifteenMin = 15 * diffOneMin
-	diffOneHour    = 4 * diffFifteenMin
-	diffOneDay     = 24 * diffOneHour
 )
 
 type GetTradesReq struct {
@@ -29,24 +20,31 @@ type RecentTrade struct {
 	Price     string `json:"price"`     // цена транзакции
 	Amount    string `json:"amount"`    // объём транзакции в базовой валюте
 	Side      Side   `json:"side"`      // как биржа засчитала эту сделку (как buy или как sell)
-	Timestamp int64  `json:"timestamp"` // время UTC UnixNano
+	Timestamp int64  `json:"timestamp"` // время UTC UnixNano // Оставил милли
 }
 type RecentTradeArr []RecentTrade
 
-func (trades RecentTradeArr) AggregateToKlines(interval Interval) []Kline {
+func (trades RecentTradeArr) ConvertToKline(interval Interval) ([]Kline, error) {
 	candles := make(map[int64]*Kline)
-	intervalMs := intervalDurationMs(interval)
-	var mu sync.Mutex
+	//mu := new(sync.Mutex)
 
 	for _, trade := range trades {
-		price := toFloat64(trade.Price)
-		amount := toFloat64(trade.Amount)
+		price, err := strconv.ParseFloat(trade.Price, 64)
+		if err != nil {
 
-		start := trade.Timestamp - (trade.Timestamp % intervalMs)
-		end := start + intervalMs
+			return nil, err
+		}
+		amount, err := strconv.ParseFloat(trade.Amount, 64)
+		if err != nil {
+			return nil, err
+		}
 
-		mu.Lock()
-		candle, exists := candles[start]
+		startEnd := GetCandleIntervalByTime(trade.Timestamp, interval)
+
+		startEnd.End-- // так возвращает сама биржа
+
+		//mu.Lock()
+		candle, exists := candles[startEnd.Start]
 		if !exists {
 			candle = &Kline{
 				Pair:      trade.Pair,
@@ -55,11 +53,11 @@ func (trades RecentTradeArr) AggregateToKlines(interval Interval) []Kline {
 				H:         price,
 				L:         price,
 				C:         price,
-				UtcBegin:  start,
-				UtcEnd:    end,
+				UtcBegin:  startEnd.Start,
+				UtcEnd:    startEnd.End,
 				VolumeBS:  VBS{},
 			}
-			candles[start] = candle
+			candles[startEnd.Start] = candle
 		}
 
 		if price > candle.H {
@@ -72,46 +70,20 @@ func (trades RecentTradeArr) AggregateToKlines(interval Interval) []Kline {
 
 		// Обновление объемов
 		if trade.Side == Buy {
-			candle.VolumeBS.BuyBase += amount
-			candle.VolumeBS.BuyQuote += price * amount
+			candle.VolumeBS.BuyBase += amount / price
+			candle.VolumeBS.BuyQuote += amount
 		} else {
-			candle.VolumeBS.SellBase += amount
-			candle.VolumeBS.SellQuote += price * amount
+			candle.VolumeBS.SellBase += amount / price
+			candle.VolumeBS.SellQuote += amount
 		}
-		mu.Unlock()
+		//mu.Unlock()
 	}
 
-	// Преобразование карты в массив
 	var result []Kline
 	for _, candle := range candles {
 		result = append(result, *candle)
 	}
-	return result
-}
-
-func toFloat64(s string) float64 {
-	val, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		fmt.Printf("Ошибка преобразования строки '%s' в float64: %v\n", s, err)
-		return 0
-	}
-	return val
-}
-
-// intervalDurationMs возвращает длительность интервала в миллисекундах
-func intervalDurationMs(interval Interval) int64 {
-	switch IntervalToType[interval] {
-	case IntervalTypeOneMin:
-		return diffOneMin
-	case IntervalTypeFifteenMin:
-		return diffFifteenMin
-	case IntervalTypeOneHour:
-		return diffOneHour
-	case IntervalTypeOneDay:
-		return diffOneDay
-	default:
-		return diffOneMin
-	}
+	return result, nil
 }
 
 //type Trade struct {

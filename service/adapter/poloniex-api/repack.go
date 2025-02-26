@@ -94,8 +94,8 @@ func repackKL(pair poloniex.Pair, in []candleData) (poloniex.GetCandleStickResp,
 			UtcEnd:    c.CloseTime,
 			VolumeBS: poloniex.VBS{
 				BuyBase:   buyTakerQuantity,
-				SellBase:  buyTakerAmount,
-				BuyQuote:  quantity - buyTakerQuantity,
+				SellBase:  quantity - buyTakerQuantity,
+				BuyQuote:  buyTakerAmount,
 				SellQuote: amount - buyTakerAmount,
 			},
 		})

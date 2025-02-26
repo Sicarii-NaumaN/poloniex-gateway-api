@@ -1,5 +1,12 @@
 package poloniex
 
+const (
+	diffOneMin     = 60 * 1000
+	diffFifteenMin = 15 * diffOneMin
+	diffOneHour    = 4 * diffFifteenMin
+	diffOneDay     = 24 * diffOneHour
+)
+
 type Interval string
 
 const (
@@ -32,4 +39,45 @@ var TypeToInterval = map[IntervalType]Interval{
 	IntervalTypeFifteenMin: FifteenMin,
 	IntervalTypeOneHour:    OneHour,
 	IntervalTypeOneDay:     OneDay,
+}
+
+type StartEndInterval struct {
+	Start int64
+	End   int64
+}
+
+func intervalDurationMs(interval Interval) int64 {
+	switch IntervalToType[interval] {
+	case IntervalTypeOneMin:
+		return diffOneMin
+	case IntervalTypeFifteenMin:
+		return diffFifteenMin
+	case IntervalTypeOneHour:
+		return diffOneHour
+	case IntervalTypeOneDay:
+		return diffOneDay
+	default:
+		return diffOneMin
+	}
+}
+
+// Возвращает начало и конец свечи для каждого интервала
+func GetCandleIntervalsByTime(ts int64) map[Interval]StartEndInterval {
+	return map[Interval]StartEndInterval{
+		OneMin:     GetCandleIntervalByTime(ts, OneMin),
+		FifteenMin: GetCandleIntervalByTime(ts, FifteenMin),
+		OneHour:    GetCandleIntervalByTime(ts, OneHour),
+		OneDay:     GetCandleIntervalByTime(ts, OneDay),
+	}
+}
+
+func GetCandleIntervalByTime(ts int64, interval Interval) StartEndInterval {
+	diff := intervalDurationMs(interval)
+	start := ts - (ts % diff)
+	end := start + diff
+
+	return StartEndInterval{
+		Start: start,
+		End:   end,
+	}
 }

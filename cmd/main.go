@@ -42,6 +42,7 @@ func main() {
 		}
 	}()
 
+	// Тут происходит синк архивных свечей
 	syncer := prepare.InitSyncer(db, poloniexSvc)
 	go func() {
 		dctx := xcontext.NewDetachedContext(ctx)
@@ -51,12 +52,12 @@ func main() {
 	}()
 
 	// Вот тут логика преобразования трейдов свечи
-	//go func() {
-	//	dctx := xcontext.NewDetachedContext(ctx)
-	//	if err := syncer.RunCandlesBuilder(dctx); err != nil {
-	//		logger.Errorf("fatal error syncer.RunCandlesBuilder: %v", err)
-	//	}
-	//}()
+	go func() {
+		dctx := xcontext.NewDetachedContext(ctx)
+		if err = syncer.RunCandlesBuilder(dctx); err != nil {
+			logger.Errorf("fatal error syncer.RunCandlesBuilder: %v", err)
+		}
+	}()
 
 	port := config.GetConfigInt(config.Port)
 	logger.Info(fmt.Sprintf("Started server at :%d. Swagger docs stated at %d", port, port+1))

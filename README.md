@@ -1,5 +1,10 @@
 # poloniex-gateway-api
 
+Как запустить
+```shell
+$ go mod tidy
+$ DB_DSN=postgresql://postgres:postgres@localhost:5432/poloniex IS_SWAGGER_CREATED=false PORT=3000 go run ./cmd
+```
 **Инициализация**
 [main.go](cmd/main.go)
 

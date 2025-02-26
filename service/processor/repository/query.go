@@ -42,7 +42,9 @@ func upsertCandles(ctx context.Context, tx pgx.Tx, candles []poloniex.Kline) err
 		query = `
 		INSERT INTO candles
 			(pair_id, time_frame, begin_ts, end_ts, data) VALUES %s
-		ON CONFLICT DO NOTHING;`
+		ON CONFLICT(pair_id, time_frame, begin_ts) DO UPDATE 
+		    SET 
+		        data = EXCLUDED.data;`
 
 		valuesTemplate = `(?,?,?,?,?)`
 	)
